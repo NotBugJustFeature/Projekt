@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bejelentkezes</title>
+    <link rel="stylesheet" type="text/css" href="import\bootstrap.min.css">
+    <script src="import/bootstrap.min.js"></script>
+    <style>
+        .heightProblem{
+            min-height: 100vh;
+        }
+        .form{
+            padding: 100px;
+            border: 1px solid black;
+            min-height: 50vh;
+            min-width: 60vh;
+            border-radius: 40px;
+        }
+        .active{
+            border-bottom: aqua 3px solid;
+        }
+        .changer{
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="heightProblem">
+    <div class="d-flex flex-row justify-content-center align-items-center heightProblem">
+
+        <div class="form">
+            <div class="d-flex justify-content-around">
+                <span id="sign-up-change" class="changer">Regisztracio</span>
+                <span id="sign-in-change" class="active changer">Bejelentkezes</span>
+            </div>
+            <br>
+            <form method="post" name="signup" class="d-flex flex-column d-none">
+                <div class="form-group">
+                    <label for="sign-up-name">Nev</label>
+                    <input type="text" name="username" class="form-control" id="sign-up-name" placeholder="Add meg a neved">
+                </div>
+                <div class="form-group">
+                    <label for="sign-up-email">Email cim</label>
+                    <input type="email" name="email" class="form-control" id="sign-up-email" placeholder="Add meg az email cimed">
+                </div>
+                <div class="form-group">
+                    <label for="sign-up-password">Jelszo</label>
+                    <input type="password" name="password" class="form-control" id="sign-up-password" placeholder="Add meg a jelszavad">
+                </div>
+                <div class="form-group">
+                    <label for="sign-up-password-repeat">Jelszo ujra</label>
+                    <input type="password" class="form-control" id="sign-up-password-repeat" placeholder="Ismeteld meg">
+                </div>
+                <div class="form-group form-check" style="padding: 0px;">
+                    <input type="checkbox" class="sign-up-terms" id="terms">
+                    <label class="form-check-label" for="exampleCheck1">Elfogadom a <a onclick="window.open('terms' + location.search)" href="">felhasznalasi felteteleket!</a></label>
+                </div>
+                <small id="emailHelp" class="form-text text-muted">Soha ne ossza meg belepesi adatait masokkal!</small>
+                <input type="submit" class="btn btn-primary align-self-center" value="Regisztracio" id="sign-up-submit" disabled>
+                <span class=" alert-danger" id="sign-up-out"></span>
+            </form>
+
+            <form method="post" name="signin" class="d-flex flex-column">
+                <div class="form-group">
+                    <label for="sign-up-email">Email cim</label>
+                    <input type="email" name="email" class="form-control" id="sign-in-email" placeholder="Add meg az email cimed">
+                </div>
+                <div class="form-group">
+                    <label for="sign-up-password">Jelszo</label>
+                    <input type="password" name="password" class="form-control" id="sign-in-password" placeholder="Add meg a jelszavad">
+                </div>
+                <input type="submit" class="btn btn-primary align-self-center" value="Bejelentkezes" id="sign-in-submit">
+                <span class=" alert-danger" id="sign-in-out"></span>
+            </form>
+        </div>
+    </div>
+    <script>
+        const $ = (param) => document.getElementById(param)
+        $("terms").addEventListener("click", () => {
+            $("sign-up-submit").disabled = !$("terms").checked 
+        })
+
+        $("sign-up-submit").addEventListener("click", (e) => {
+            e.preventDefault()
+            document.querySelectorAll("input")
+        })
+
+        $("sign-in-change").addEventListener("click", () => {
+            document.forms.signup.classList.add("d-none")
+            document.forms.signin.classList.remove("d-none")
+            $("sign-up-change").classList.remove("active")
+            $("sign-in-change").classList.add("active")
+        })
+
+        $("sign-up-change").addEventListener("click", () => {
+            document.forms.signup.classList.remove("d-none")
+            document.forms.signin.classList.add("d-none")
+            $("sign-in-change").classList.remove("active")
+            $("sign-up-change").classList.add("active")
+        })
+
+        $("sign-up-submit").addEventListener("click", (e) => {
+            e.preventDefault();
+            let form = new FormData(document.forms.signup)
+            if($("sign-up-password").value != "" && $("sign-up-password").value.length < 32 && $("sign-up-password").value == $("sign-up-password-repeat").value && $("sign-up-name").value != "" && $("sign-up-email").value != ""){
+                form.append("formName","signup")
+                postData(form, "up")
+            }
+        })
+
+        document.forms.signin.addEventListener("submit", (e) => {
+            e.preventDefault();
+            let form = new FormData(document.forms.signin)
+            form.append("formName","signin")
+            postData(form, "in")
+        })
+
+        async function postData(formattedFormData, from){
+            const response = await fetch('login',{
+                method: 'POST',
+                body: formattedFormData
+            })
+            const data = await response.text()
+            console.log(data)
+            if(data == "success") window.location.reload()
+            if(data == "failed" && from == "in") {$("sign-in-out").innerHTML = "Hibas felhasznalonev vagy jelszo"; setTimeout(() => { $("sign-in-out").innerHTML = ""; }, 5000);}
+            if(data == "failed" && from == "up") {$("sign-up-out").innerHTML = "Ez az email cim mar regisztralva van!"; setTimeout(() => { $("sign-up-out").innerHTML = ""; }, 5000);}
+        }
+    </script>
+</body>
+</html>
